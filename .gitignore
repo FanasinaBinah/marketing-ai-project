@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Environnements virtuels
+.venv/
+venv/
+env/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE
+.vscode/
+.idea/
+
+# Données générées
+data/output/
+
+# Modèles générés
+models/*.pkl
+models/*.joblib
+
+# Variables d'environnement
+.env
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

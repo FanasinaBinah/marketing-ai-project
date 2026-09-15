@@ -1,0 +1,101 @@
+﻿Product_ID,Product_Name,Category,Price
+P001,T-Shirt Coton,Clothing,65.56
+P002,Jeans Slim,Clothing,143.35
+P003,Robe d'Été,Clothing,113.82
+P004,Pantalon Chino,Clothing,95.82
+P005,Chemise en Lin,Clothing,36.06
+P006,Pull en Laine,Clothing,78.45
+P007,Short en Jean,Clothing,52.9
+P008,Polo Classique,Clothing,48.75
+P009,Jupe Plissée,Clothing,72.4
+P010,Sweat à Capuche,Clothing,89.99
+P011,Chemisier Fluide,Clothing,61.35
+P012,Legging Sport,Clothing,42.8
+P013,Cardigan Long,Clothing,83.6
+P014,Combinaison Élégante,Clothing,124.5
+P015,Pantalon Cargo,Clothing,91.25
+P016,Baskets en Toile,Footering,36.06
+P017,Chaussures de Ville,Footering,22.84
+P018,Sandales,Footering,131.93
+P019,Bottes en Cuir,Footering,96.15
+P020,Baskets de Course,Footering,110.59
+P021,Mocassins,Footering,87.45
+P022,Escarpins,Footering,119.9
+P023,Tongs,Footering,25.5
+P024,Chaussures de Randonnée,Footering,135.75
+P025,Baskets Montantes,Footering,99.99
+P026,Ballerines,Footering,64.8
+P027,Chaussures de Sport,Footering,105.3
+P028,Derbies en Cuir,Footering,128.65
+P029,Baskets Minimalistes,Footering,76.4
+P030,Chaussures de Plage,Footering,31.9
+P031,Manteau d'Hiver,Outerwear,17.78
+P032,Veste en Cuir,Outerwear,145.94
+P033,Trench-Coat,Outerwear,127.38
+P034,Doudoune Légère,Outerwear,43.67
+P035,Coupe-Vent,Outerwear,39.55
+P036,Blouson Bomber,Outerwear,112.45
+P037,Parka Imperméable,Outerwear,139.8
+P038,Veste en Jean,Outerwear,94.6
+P039,Manteau Long,Outerwear,156.75
+P040,Gilet Matelassé,Outerwear,82.3
+P041,Cape Élégante,Outerwear,118.9
+P042,Veste Polaire,Outerwear,73.55
+P043,Imperméable Classique,Outerwear,108.4
+P044,Veste Technique,Outerwear,149.99
+P045,Poncho Chaud,Outerwear,67.85
+P046,Lunettes de Soleil,Accessoiries,39.76
+P047,Montre Classique,Accessoiries,56.07
+P048,Ceinture en Cuir,Accessoiries,85.84
+P049,Casquette,Accessoiries,73.31
+P050,Écharpe en Soie,Accessoiries,54.32
+P051,Sac à Main,Accessoiries,129.9
+P052,Portefeuille en Cuir,Accessoiries,68.45
+P053,Chapeau en Feutre,Accessoiries,59.8
+P054,Gants en Cuir,Accessoiries,77.25
+P055,Bracelet Élégant,Accessoiries,45.6
+P056,Collier Minimaliste,Accessoiries,92.75
+P057,Boucles d'Oreilles,Accessoiries,51.4
+P058,Sac à Dos Urbain,Accessoiries,104.9
+P059,Porte-Cartes,Accessoiries,34.75
+P060,Foulard Imprimé,Accessoiries,47.9
+P061,Sweat Sport,Sportswear,69.95
+P062,T-Shirt Running,Sportswear,39.9
+P063,Short de Running,Sportswear,44.5
+P064,Veste de Sport,Sportswear,98.75
+P065,Pantalon de Jogging,Sportswear,74.8
+P066,Brassière Sport,Sportswear,36.9
+P067,Débardeur Fitness,Sportswear,32.5
+P068,Legging Performance,Sportswear,58.95
+P069,Vêtement Thermique,Sportswear,81.2
+P070,Ensemble de Sport,Sportswear,115.6
+P071,Maillot de Football,Sportswear,64.9
+P072,Polo de Golf,Sportswear,72.35
+P073,Veste Running,Sportswear,89.5
+P074,Pantalon Training,Sportswear,67.75
+P075,Chaussures Fitness,Sportswear,102.4
+P076,Robe de Soirée,Formalwear,159.9
+P077,Costume Classique,Formalwear,189.5
+P078,Blazer Élégant,Formalwear,134.75
+P079,Chemise Habillée,Formalwear,79.9
+P080,Pantalon de Costume,Formalwear,99.5
+P081,Cravate en Soie,Formalwear,42.8
+P082,Nœud Papillon,Formalwear,35.6
+P083,Robe Cocktail,Formalwear,145.9
+P084,Veste de Costume,Formalwear,169.8
+P085,Gilet de Costume,Formalwear,74.5
+P086,Chemisier Satiné,Formalwear,88.95
+P087,Jupe Élégante,Formalwear,91.7
+P088,Pantalon Habillé,Formalwear,105.85
+P089,Smoking Homme,Formalwear,219.9
+P090,Robe Longue Élégante,Formalwear,179.5
+P091,Pyjama en Coton,Loungewear,49.9
+P092,Peignoir Doux,Loungewear,68.75
+P093,Ensemble Homewear,Loungewear,79.95
+P094,Pantalon Confort,Loungewear,54.8
+P095,T-Shirt Oversize,Loungewear,45.5
+P096,Short de Nuit,Loungewear,38.9
+P097,Robe de Chambre,Loungewear,72.6
+P098,Sweat Confort,Loungewear,63.45
+P099,Pantalon Flanelle,Loungewear,59.9
+P100,Ensemble Pyjama Premium,Loungewear,94.75

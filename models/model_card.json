@@ -1,0 +1,29 @@
+{
+  "modele_deploye": "XGBoost",
+  "seuil_decision": 0.275,
+  "horizon_jours": 180,
+  "cutoff_entrainement": "2025-12-30",
+  "cutoff_test": "2026-03-15",
+  "n_train": 3704,
+  "n_test": 3713,
+  "taux_churn_train": 0.6325593952483801,
+  "taux_churn_test": 0.656342580123889,
+  "mesures": {
+    "Random Forest": {
+      "auc": 0.9730776701401974,
+      "accuracy": 0.9000807971990304,
+      "precision": 0.8960889570552147,
+      "recall": 0.9589659417316373,
+      "f1": 0.9264618434093161,
+      "seuil": 0.325
+    },
+    "XGBoost": {
+      "auc": 0.9746860701592354,
+      "accuracy": 0.9051979531376245,
+      "precision": 0.89295137580098,
+      "recall": 0.9720968403775133,
+      "f1": 0.9308447937131631,
+      "seuil": 0.275
+    }
+  }
+}

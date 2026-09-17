@@ -14,6 +14,11 @@ d'arbres que XGBoost, mais configuré pour se comporter comme une forêt aléato
 pas le chargement de sklearn.svm.
 """
 
+import json
+from pathlib import Path
+
+import joblib
+import numpy as np
 import pandas as pd
 import streamlit as st
 
@@ -25,6 +30,10 @@ from sklearn.metrics import (
     auc,
     precision_recall_curve,
 )
+
+
+MODEL_PATH = Path(__file__).parent / "models" / "churn_model.joblib"
+MODEL_CARD_PATH = Path(__file__).parent / "models" / "model_card.json"
 
 
 @st.cache_data(show_spinner="Construction du jeu de données de churn...")
@@ -149,3 +158,85 @@ def evaluate_models(models: dict):
         }
 
     return results
+
+
+@st.cache_resource(show_spinner="Chargement du modèle de churn déployé...")
+def load_deployed_churn_artifacts() -> dict:
+    """Charge le modèle et le préprocesseur exportés par le notebook de déploiement."""
+    return joblib.load(MODEL_PATH)
+
+
+@st.cache_data(show_spinner="Préparation du scoring churn...")
+def build_deployed_scoring_dataset(
+    sales_full: pd.DataFrame,
+    customers: pd.DataFrame,
+    cutoff_date: str,
+) -> pd.DataFrame:
+    """Reproduit le snapshot RFM utilisé lors du déploiement du modèle."""
+    cutoff = pd.to_datetime(cutoff_date)
+    observed = sales_full[pd.to_datetime(sales_full["Date"]) <= cutoff].copy()
+
+    base = observed.groupby("Customer_ID").agg(
+        recence=("Date", lambda dates: (cutoff - dates.max()).days),
+        frequence=("Sale_ID", "count"),
+        panier_moyen=("Sale_Price", "mean"),
+        montant_total=("Sale_Price", "sum"),
+        panier_std=("Sale_Price", lambda values: values.std() if len(values) > 1 else 0),
+        anciennete=("Date", lambda dates: (cutoff - dates.min()).days),
+        channel_prefer=("Channel", lambda values: values.mode().iloc[0] if not values.mode().empty else "Online"),
+        quantite_totale=("Quantity", "sum"),
+        produits_uniques=("Product_ID", "nunique"),
+    ).reset_index()
+
+    def average_inter_purchase(dates):
+        if len(dates) <= 1:
+            return 999.0
+        ordered = sorted(dates)
+        return float(np.mean([(ordered[i] - ordered[i - 1]).days for i in range(1, len(ordered))]))
+
+    inter_purchase = (
+        observed.groupby("Customer_ID")["Date"]
+        .apply(average_inter_purchase)
+        .reset_index(name="delai_moyen_inter_achat")
+    )
+    recent = observed[observed["Date"] >= cutoff - pd.Timedelta(days=90)]
+    recent_features = recent.groupby("Customer_ID").agg(
+        freq_recente=("Sale_ID", "count"),
+        montant_recent=("Sale_Price", "sum"),
+    ).reset_index()
+
+    features = base.merge(inter_purchase, on="Customer_ID", how="left").merge(
+        recent_features, on="Customer_ID", how="left"
+    )
+    features["freq_recente"] = features["freq_recente"].fillna(0)
+    features["montant_recent"] = features["montant_recent"].fillna(0)
+    features["frequence_mensuelle"] = features["frequence"] / ((features["anciennete"] + 1) / 30.0)
+    features["ratio_activite_recente"] = features["freq_recente"] / features["frequence"]
+    features["ratio_montant_recent"] = features["montant_recent"] / (features["montant_total"] + 1e-5)
+    features["retard_inter_achat"] = features["recence"] / (features["delai_moyen_inter_achat"] + 1e-5)
+    features["ratio_diversite_produit"] = features["produits_uniques"] / features["frequence"]
+
+    customer_cols = ["Customer_ID", "Name", "Location", "Age", "Gender"]
+    customer_base = customers[[c for c in customer_cols if c in customers.columns]]
+    return customer_base.merge(features, on="Customer_ID", how="inner")
+
+
+@st.cache_data(show_spinner="Calcul des probabilités de churn...")
+def score_deployed_churn(scoring_dataset: pd.DataFrame) -> pd.DataFrame:
+    """Applique l'artefact déployé au snapshot de scoring local."""
+    artifacts = load_deployed_churn_artifacts()
+    input_columns = artifacts["colonnes_entree"]
+    model_input = scoring_dataset[input_columns].copy()
+    probabilities = artifacts["modele"].predict_proba(
+        artifacts["preprocessor"].transform(model_input)
+    )[:, 1]
+    scored = scoring_dataset.copy()
+    scored["churn_probability"] = probabilities
+    scored["churn_prediction"] = (probabilities >= artifacts["seuil"]).astype(int)
+    return scored
+
+
+@st.cache_data
+def load_model_card() -> dict:
+    """Charge les métriques locales associées au modèle déployé."""
+    return json.loads(MODEL_CARD_PATH.read_text(encoding="utf-8"))

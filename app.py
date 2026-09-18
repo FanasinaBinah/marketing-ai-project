@@ -22,23 +22,14 @@ st.markdown("""
     html, body, [data-testid="stAppViewContainer"], [data-testid="stApp"] {
         background: #F4F3F9 !important;
     }
-    /* Point clé pour la barre latérale fixe : c'est la page Streamlit qui
-       défilait, pas le contenu de l'iframe. Une iframe de 1800 px de haut
-       sort donc du champ en défilant, et position:fixed (calculé par rapport
-       à l'iframe) semble « suivre » le scroll. On bloque le défilement de la
-       page hôte et on donne à l'iframe exactement la hauteur de la fenêtre :
-       le défilement se fait alors à l'intérieur, et le menu reste en place. */
-    html, body, [data-testid="stAppViewContainer"] {
-        height: 100% !important;
-        overflow: hidden !important;
-    }
-    [data-testid="stMain"] { overflow: hidden !important; }
-    iframe[title="streamlit.components.v1.html"],
-    [data-testid="stCustomComponentV1"] {
-        height: 100vh !important;
-        min-height: 100vh !important;
-        display: block !important;
-    }
+    /* Le HTML embarqué gère maintenant lui-même son défilement naturel
+       (voir dashboard_marketia.html : plus de sidebar position:fixed ni de
+       .main forcé à 100vh). On ne bloque donc plus le défilement de la page
+       hôte ni ne force l'iframe à occuper exactement 100vh : c'est
+       justement ce qui coinçait le défilement sur les pages au contenu
+       court (Segmentation clients, Profilage des segments). L'iframe a une
+       hauteur généreuse et défile nativement (scrolling=True ci-dessous)
+       si une page a plus de contenu que cette hauteur. */
     [data-testid="stHeader"], [data-testid="stToolbar"], #MainMenu, footer {
         display: none !important;
         visibility: hidden !important;
@@ -100,7 +91,8 @@ html = html.replace(
     1,
 )
 
-# scrolling=False : c'est le panneau .main du dashboard qui gère son propre
-# défilement. On évite ainsi la double barre de défilement, et la barre
-# latérale comme le panneau de prédiction restent bien collés.
-components.html(html, height=900, scrolling=False)
+# scrolling=True : c'est maintenant le document HTML lui-même qui défile
+# naturellement (voir dashboard_marketia.html). L'iframe a une hauteur
+# généreuse ; si une page a plus de contenu que cette hauteur, l'iframe
+# affiche sa propre barre de défilement native — plus de page bloquée.
+components.html(html, height=1400, scrolling=True)

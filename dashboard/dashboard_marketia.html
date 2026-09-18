@@ -35,16 +35,20 @@ button{font-family:inherit}
 @media (prefers-reduced-motion: reduce){ *{transition:none !important; animation:none !important} }
 
 /* ---------- Structure ---------- */
-/* La coquille occupe toute la hauteur de la fenêtre : c'est .main qui défile,
-   jamais la page. La barre latérale reste donc visible en permanence,
-   y compris lorsque le HTML est affiché dans une iframe (Streamlit). */
-html,body{height:100%}
-body{overflow:hidden}
-.shell{display:flex; height:100vh; padding-left:258px}
+/* La page défile normalement (c'est le document — donc l'iframe Streamlit,
+   qui a scrolling=True — qui gère le défilement). On évite tout piège où
+   .main serait forcé à une hauteur fixe (100vh) sans rapport avec la vraie
+   hauteur de la fenêtre d'accueil : dans une iframe à hauteur fixe, cela
+   coince le défilement dès qu'une page a moins de contenu que cette hauteur
+   (Segmentation, Profilage…), ou le limite à une zone interne invisible du
+   reste. La barre latérale reste visible grâce à position:sticky, qui ne
+   bloque pas le défilement du document comme le ferait position:fixed. */
+html,body{min-height:100%}
+.shell{display:flex; min-height:100vh}
 .sidebar{
   width:258px; flex:0 0 258px; background:var(--ink); color:#D9D5EE;
   padding:22px 16px; display:flex; flex-direction:column; gap:22px;
-  position:fixed; left:0; top:0; bottom:0; z-index:1000; height:100vh;
+  position:sticky; left:0; top:0; align-self:flex-start; z-index:1000; height:100vh;
   overflow-y:auto; overscroll-behavior:contain;
 }
 .sidebar::-webkit-scrollbar{width:6px}
@@ -76,8 +80,8 @@ body{overflow:hidden}
 }
 .import-btn:hover{background:rgba(255,255,255,.13); color:#fff}
 
-.main{flex:1; min-width:0; padding:26px 30px 56px; max-width:1420px;
-      height:100vh; overflow-y:auto; overscroll-behavior:contain; scroll-behavior:smooth}
+.main{flex:1; min-width:0; padding:26px 30px 56px; max-width:1420px}
+html{scroll-behavior:smooth}
 .topline{display:flex; justify-content:space-between; align-items:flex-start; gap:20px; flex-wrap:wrap; margin-bottom:22px}
 .chip{
   display:inline-flex; align-items:center; gap:7px; background:var(--violet-soft); color:#4B32B8;
@@ -165,9 +169,22 @@ td.num,th.num{text-align:right; font-variant-numeric:tabular-nums}
 .cm .cell b{display:block; font-family:var(--display); font-size:19px; font-weight:700}
 .cm .rowlab{color:var(--muted); font-size:12px; text-align:right; padding-right:4px}
 .cm .collab{color:var(--muted); font-size:12px; text-align:center}
+.priority-section{border:1.5px solid var(--violet); background:linear-gradient(180deg,var(--violet-soft) 0%, #fff 120px)}
+.priority-list{display:flex; flex-direction:column; gap:10px; margin-top:12px}
+.priority-card{display:flex; gap:14px; align-items:center; background:#fff; border:1px solid var(--line); border-radius:var(--radius-sm); padding:12px 16px; box-shadow:var(--shadow)}
+.priority-rank{flex:0 0 auto; width:34px; height:34px; border-radius:10px; background:var(--ink); color:#fff; display:grid; place-items:center; font-family:var(--display); font-weight:800; font-size:14px}
+.priority-body{flex:1; min-width:0}
+.priority-name{font-family:var(--display); font-weight:700; font-size:15px; margin-bottom:4px}
+.priority-stats{display:flex; gap:16px; flex-wrap:wrap; font-size:12.5px; color:var(--muted); margin-bottom:6px}
+.priority-stats b{color:var(--text); font-variant-numeric:tabular-nums}
 .switch{display:inline-flex; background:#F1EFF8; border-radius:999px; padding:3px; gap:2px}
-.switch button{border:0; background:transparent; padding:6px 13px; border-radius:999px; font-size:12.5px; cursor:pointer; color:var(--muted)}
+.switch.wrap{flex-wrap:wrap; border-radius:14px}
+.switch button{border:0; background:transparent; padding:6px 13px; border-radius:999px; font-size:12.5px; cursor:pointer; color:var(--muted); white-space:nowrap}
 .switch button[aria-pressed="true"]{background:#fff; color:var(--text); font-weight:600; box-shadow:0 1px 2px rgba(20,18,43,.1)}
+.filter-bar{padding:16px 20px}
+.filter-row{display:flex; gap:28px; flex-wrap:wrap; align-items:flex-start}
+.filter-group{display:flex; flex-direction:column; gap:7px}
+.filter-label{font-size:11.5px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.03em}
 svg{display:block; max-width:100%}
 .axis{font-size:11px; fill:var(--muted); font-family:var(--sans)}
 .steps{counter-reset:s; display:flex; flex-direction:column; gap:14px}
@@ -179,12 +196,11 @@ code{background:#F1EFF8; padding:1px 6px; border-radius:5px; font-size:12.5px; f
 .hide{display:none !important}
 @media (max-width:1100px){ .g4{grid-template-columns:repeat(2,minmax(0,1fr))} .g3{grid-template-columns:repeat(2,minmax(0,1fr))} }
 @media (max-width:860px){
-  body{overflow:auto}
-  .shell{flex-direction:column; height:auto; padding-left:0}
-  .sidebar{width:100%; flex:none; height:auto; position:sticky; top:0; overflow:visible}
+  .shell{flex-direction:column}
+  .sidebar{width:100%; flex:none; height:auto; overflow:visible}
   .nav{flex-direction:row; flex-wrap:wrap}
   .nav button{width:auto}
-  .main{padding:20px 16px 40px; height:auto; overflow:visible}
+  .main{padding:20px 16px 40px}
   .result-card{position:static !important}
   .g2,.g3,.g4,.form-grid{grid-template-columns:minmax(0,1fr)}
   .span2{grid-column:auto}
@@ -324,19 +340,23 @@ function barsH(items, {color=C.violet, fmt=v=>nf2(v), labelW=250, rowH=26, color
   return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:${h}px">${rows}</svg>`;
 }
 
-function donut(items, {fmt=eur, size=230}={}){
+function donut(items, {fmt=eur, size=230, highlight=null}={}){
   const total = items.reduce((s,d)=>s+d.value,0);
+  const hasHighlight = highlight && highlight !== 'all';
   const r=90, ri=58, cx=size/2, cy=size/2;
   let a0 = -Math.PI/2, paths='';
   items.forEach((d,i)=>{
     const a1 = a0 + (d.value/total)*Math.PI*2;
     const large = (a1-a0) > Math.PI ? 1 : 0;
+    const isSel = hasHighlight && d.label === highlight;
+    const rr = isSel ? r+6 : r;
     const p = (rad,a)=>[cx+rad*Math.cos(a), cy+rad*Math.sin(a)];
-    const [x0,y0]=p(r,a0), [x1,y1]=p(r,a1), [x2,y2]=p(ri,a1), [x3,y3]=p(ri,a0);
-    paths += `<path d="M${x0.toFixed(1)},${y0.toFixed(1)} A${r},${r} 0 ${large} 1 ${x1.toFixed(1)},${y1.toFixed(1)} L${x2.toFixed(1)},${y2.toFixed(1)} A${ri},${ri} 0 ${large} 0 ${x3.toFixed(1)},${y3.toFixed(1)} Z" fill="${SERIES[i%SERIES.length]}"><title>${esc(d.label)} — ${esc(fmt(d.value))} (${pct(d.value/total*100)})</title></path>`;
+    const [x0,y0]=p(rr,a0), [x1,y1]=p(rr,a1), [x2,y2]=p(ri,a1), [x3,y3]=p(ri,a0);
+    const opacity = hasHighlight && !isSel ? 0.3 : 1;
+    paths += `<path d="M${x0.toFixed(1)},${y0.toFixed(1)} A${rr},${rr} 0 ${large} 1 ${x1.toFixed(1)},${y1.toFixed(1)} L${x2.toFixed(1)},${y2.toFixed(1)} A${ri},${ri} 0 ${large} 0 ${x3.toFixed(1)},${y3.toFixed(1)} Z" fill="${SERIES[i%SERIES.length]}" opacity="${opacity}"><title>${esc(d.label)} — ${esc(fmt(d.value))} (${pct(d.value/total*100)})</title></path>`;
     a0 = a1;
   });
-  const legend = items.map((d,i)=>`<div><i style="background:${SERIES[i%SERIES.length]}"></i>${esc(d.label)} · ${pct(d.value/total*100,1)}</div>`).join('');
+  const legend = items.map((d,i)=>`<div style="${hasHighlight && d.label!==highlight?'opacity:.5':''}"><i style="background:${SERIES[i%SERIES.length]}"></i>${esc(d.label)} · ${pct(d.value/total*100,1)}</div>`).join('');
   return `<div style="display:flex;gap:18px;align-items:center;flex-wrap:wrap">
     <svg viewBox="0 0 ${size} ${size}" style="width:${size}px;height:${size}px;flex:0 0 auto">${paths}</svg>
     <div class="legend" style="flex-direction:column;gap:6px">${legend}</div></div>`;
@@ -491,29 +511,69 @@ function card(title, hint, body, cls=''){
 }
 
 /* ---------- 1. Vue d'ensemble ---------- */
+let ovYear = 'all';      // filtre année : 'all' ou "2024", "2025"...
+let ovCat  = 'all';      // filtre catégorie produit : 'all' ou un libellé de D.ca_categorie
 function pageOverview(){
   const k = D.kpis, m = D.meta;
-  const mensuel = D.ca_mensuel.map(r=>({l:r.mois.slice(2), v:r.ca, t:eur(r.ca)}));
+  const years = D.ca_annee.map(d=>d.label);
+  const cats  = D.ca_categorie.map(d=>d.label);
+
+  // Mois retenus selon le filtre année
+  const moisFiltres = ovYear === 'all' ? D.ca_mensuel : D.ca_mensuel.filter(r => r.mois.startsWith(ovYear));
+  const caFiltre = moisFiltres.reduce((s,r)=>s+r.ca, 0);
+  const transacFiltrees = moisFiltres.reduce((s,r)=>s+r.transactions, 0);
+  const panierFiltre = transacFiltrees ? caFiltre/transacFiltrees : 0;
+  const mensuel = moisFiltres.map(r=>({l:r.mois.slice(2), v:r.ca, t:eur(r.ca)}));
+
+  // Catégorie sélectionnée : son CA vient directement de D.ca_categorie (agrégat global,
+  // indépendant du filtre année car les données ne croisent pas mois × catégorie)
+  const catInfo = ovCat === 'all' ? null : D.ca_categorie.find(c=>c.label===ovCat);
+
+  // Table produits filtrée par catégorie
+  const produits = ovCat === 'all' ? D.top_produits : D.top_produits.filter(p=>p.categorie===ovCat);
+
+  const yearChips = `<button data-yr="all" aria-pressed="${ovYear==='all'}">Toutes les années</button>` +
+    years.map(y=>`<button data-yr="${y}" aria-pressed="${ovYear===y}">${y}</button>`).join('');
+  const catChips = `<button data-cat="all" aria-pressed="${ovCat==='all'}">Toutes les catégories</button>` +
+    cats.map(c=>`<button data-cat="${esc(c)}" aria-pressed="${ovCat===c}">${esc(c)}</button>`).join('');
+
   return `
+  <section class="card filter-bar" style="margin-bottom:18px">
+    <div class="filter-row">
+      <div class="filter-group">
+        <div class="filter-label">Année</div>
+        <div class="switch" id="ovYearSwitch" role="group" aria-label="Filtrer par année">${yearChips}</div>
+      </div>
+      <div class="filter-group">
+        <div class="filter-label">Catégorie de produit</div>
+        <div class="switch wrap" id="ovCatSwitch" role="group" aria-label="Filtrer par catégorie">${catChips}</div>
+      </div>
+    </div>
+  </section>
   <div class="kpis">
-    ${kpi('Chiffre d\'affaires', eur(k.ca_total), `du ${frDate(m.periode_debut)} au ${frDate(m.periode_fin)}`, true)}
+    ${kpi('Chiffre d\'affaires', eur(caFiltre),
+      ovYear==='all' ? `du ${frDate(m.periode_debut)} au ${frDate(m.periode_fin)}` : `sur l'année ${ovYear}`, true)}
     ${kpi('Clients au fichier', nf(k.nb_clients), `${nf(k.nb_clients_acheteurs)} ont déjà acheté`)}
-    ${kpi('Transactions', nf(k.nb_transactions), `${nf(k.quantite_totale)} articles vendus`)}
-    ${kpi('Panier moyen', eur2(k.panier_moyen), 'par transaction')}
-    ${kpi('Budget des campagnes', eur(k.budget_marketing), `${D.campagnes.length} campagnes enregistrées`)}
+    ${kpi('Transactions', nf(transacFiltrees), ovYear==='all' ? `${nf(k.quantite_totale)} articles vendus` : `sur l'année ${ovYear}`)}
+    ${kpi('Panier moyen', eur2(panierFiltre), ovYear==='all' ? 'par transaction' : `estimé sur ${ovYear}`)}
+    ${catInfo
+      ? kpi('CA de la catégorie', eur(catInfo.value), `${esc(ovCat)} · sur l'ensemble de la période`)
+      : kpi('Budget des campagnes', eur(k.budget_marketing), `${D.campagnes.length} campagnes enregistrées`)}
   </div>
   <div class="grid g2">
-    ${card("Chiffre d'affaires mensuel", 'Somme des ventes par mois de transaction', areaChart(mensuel,{everyX:4}), 'span2')}
-    ${card('Répartition par catégorie', 'Part du chiffre d\'affaires', donut(D.ca_categorie))}
+    ${card("Chiffre d'affaires mensuel", ovYear==='all' ? 'Somme des ventes par mois de transaction' : `Détail mensuel — année ${ovYear}`,
+        mensuel.length ? areaChart(mensuel,{everyX:4}) : '<p style="color:var(--muted)">Aucune donnée pour ce filtre.</p>', 'span2')}
+    ${card('Répartition par catégorie', 'Part du chiffre d\'affaires', donut(D.ca_categorie, {highlight: ovCat}))}
     ${card('Répartition par canal de vente', 'Magasin et vente en ligne', donut(D.ca_canal))}
     ${card("Chiffre d'affaires par année", "2026 s'arrête au " + frDate(m.periode_fin),
         barsV(D.ca_annee.map(d=>({label:d.label, value:d.value, t:eur(d.value)})), {h:230, w:500}))}
-    ${card('Produits les plus vendus', 'Top 10 par chiffre d\'affaires', tableTop())}
+    ${card('Produits les plus vendus', ovCat==='all' ? 'Top 10 par chiffre d\'affaires' : `Filtré sur « ${esc(ovCat)} »`, tableTop(produits))}
   </div>`;
 }
-function tableTop(){
+function tableTop(produits = D.top_produits){
+  if (!produits.length) return '<p style="color:var(--muted)">Aucun produit pour ce filtre.</p>';
   return `<div class="table-wrap"><table><thead><tr><th>Produit</th><th>Catégorie</th><th class="num">Quantité</th><th class="num">CA</th></tr></thead><tbody>
-    ${D.top_produits.map(p=>`<tr><td>${esc(p.produit)}</td><td><span class="tag v">${esc(p.categorie)}</span></td>
+    ${produits.map(p=>`<tr><td>${esc(p.produit)}</td><td><span class="tag v">${esc(p.categorie)}</span></td>
       <td class="num">${nf(p.quantite)}</td><td class="num">${eur(p.ca)}</td></tr>`).join('')}
   </tbody></table></div>`;
 }
@@ -927,6 +987,20 @@ function pageStrategy(){
       <div class="stat-row"><span>Dernier achat (médiane)</span><b>il y a ${nf(a.recence_mediane)} jours</b></div>
       <div style="margin-top:11px;font-size:13px">${esc(a.action)}</div>
     </div>`).join('');
+  const prioritaires = s.segments_prioritaires.slice().sort((a,b)=>b.part_ca-a.part_ca);
+  const prioCards = prioritaires.map((x,i)=>`
+    <div class="priority-card">
+      <div class="priority-rank">#${i+1}</div>
+      <div class="priority-body">
+        <div class="priority-name">${esc(x.persona)}</div>
+        <div class="priority-stats">
+          <span><b>${pct(x.part_ca)}</b> du CA total</span>
+          <span><b>${nf(x.taille)}</b> clients</span>
+          <span><b>${eur2(x.depense_moyenne)}</b> dépense moy.</span>
+        </div>
+        <div class="meter"><i style="width:${x.part_ca.toFixed(1)}%;background:${i===0?C.violet:C.teal}"></i></div>
+      </div>
+    </div>`).join('');
   return `
   <div class="kpis">
     ${kpi('Budget des campagnes', eur(s.budget_total), 'montant réparti, inchangé', true)}
@@ -934,6 +1008,11 @@ function pageStrategy(){
     ${kpi('Clients à réactiver', nf(sc.n_a_risque), `probabilité ≥ ${nf2(sc.seuil).replace('.',',')}`)}
     ${kpi('CA historique concerné', eur(sc.ca_en_jeu), 'dépenses déjà réalisées par ces clients')}
   </div>
+  <section class="card span2 priority-section" style="margin-bottom:16px">
+    <h3>🛡️ Segments à protéger en priorité</h3>
+    <div class="hint">Segments issus de l'étape 4 (profilage), classés par contribution au chiffre d'affaires — à préserver en priorité dans le plan de rétention.</div>
+    <div class="priority-list">${prioCards}</div>
+  </section>
   <div class="grid g2">
     ${card('Réallocation du budget par canal', s.regle_reallocation,
       `<div class="table-wrap"><table><thead><tr><th>Canal</th><th class="num">Budget actuel</th><th class="num">Retour observé</th><th class="num">Budget proposé</th><th class="num">Écart</th></tr></thead><tbody>${rows}</tbody></table></div>`, 'span2')}
@@ -945,9 +1024,6 @@ function pageStrategy(){
       <div class="grid g3">${actions}</div>
       <div class="note">${esc(s.regle_retention)}</div>
     </section>
-    ${card('Segments à protéger en priorité', 'Segments issus de l\'étape 4, classés par contribution au chiffre d\'affaires',
-      barsH(s.segments_prioritaires.slice().sort((a,b)=>b.part_ca-a.part_ca).map(x=>({label:x.persona, value:x.part_ca})),
-        {fmt:v=>pct(v), labelW:230, rowH:34, colorFn:(d,i)=>SERIES[i%SERIES.length]}), 'span2')}
   </div>`;
 }
 
@@ -997,9 +1073,7 @@ function renderNav(){
   nav.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{
     current = b.dataset.page;
     render();
-    const main = document.getElementById('main');
-    if (main) main.scrollTop = 0;   // c'est .main qui défile, plus la fenêtre
-    window.scrollTo({top:0});
+    window.scrollTo({top:0});   // c'est la page (le document) qui défile
   }));
 }
 function render(){
@@ -1013,7 +1087,6 @@ function render(){
         <div class="page-lede">${esc(p.lede)}</div>
       </div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-        <span class="chip live">Données du notebook</span>
         <span class="chip neutral">${frDate(D.meta.periode_debut)} → ${frDate(D.meta.periode_fin)}</span>
       </div>
     </div>` + RENDER[current]();
@@ -1038,8 +1111,32 @@ function render(){
   if (current === 'segments'){
     document.querySelectorAll('.switch button').forEach(b=>b.addEventListener('click',()=>{ segK = +b.dataset.k; render(); }));
   }
+  if (current === 'overview'){
+    document.querySelectorAll('#ovYearSwitch button').forEach(b=>b.addEventListener('click',()=>{ ovYear = b.dataset.yr; render(); }));
+    document.querySelectorAll('#ovCatSwitch button').forEach(b=>b.addEventListener('click',()=>{ ovCat = b.dataset.cat; render(); }));
+  }
   /* Les graphiques viennent d'être reconstruits : on réactive les infobulles. */
   if (typeof enhanceCharts === 'function') enhanceCharts(document.getElementById('main'));
+  reportHeight();
+}
+
+/* Quand ce document est affiché dans une iframe Streamlit (app.py ou
+   dashboard_page.py), il transmet sa hauteur réelle à la page hôte par
+   postMessage : la page hôte peut alors redimensionner l'iframe pour
+   qu'elle corresponde exactement au contenu, au lieu d'une hauteur fixe
+   devinée à l'avance (source du bug de défilement bloqué). Sans effet
+   si le document n'est pas dans une iframe, ou si la page hôte n'écoute
+   pas ce message (postMessage échoue silencieusement dans ce cas). */
+function reportHeight(){
+  try{
+    if (window.parent === window) return;
+    const h = Math.ceil(document.documentElement.scrollHeight);
+    window.parent.postMessage({type:'marketia-resize', height:h}, '*');
+  }catch(e){}
+}
+window.addEventListener('resize', reportHeight);
+if (window.ResizeObserver){
+  new ResizeObserver(reportHeight).observe(document.body);
 }
 
 /* Le bouton d'import a été retiré de la barre latérale : l'ancien gestionnaire
@@ -1103,7 +1200,6 @@ document.addEventListener('pointerout', e=>{
   const target = e.target.closest && e.target.closest('[data-tip]');
   if (target && !target.contains(e.relatedTarget)) hideTip();
 });
-/* C'est .main qui défile désormais, pas la fenêtre. */
 document.addEventListener('scroll', hideTip, {passive:true, capture:true});
 
 render();
